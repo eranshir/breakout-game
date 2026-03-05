@@ -32,6 +32,13 @@ try:
 except ImportError:
     sys.exit("Missing dependency: install it with  pip install requests")
 
+# Load .env file if python-dotenv is installed (optional but convenient)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # ---------------------------------------------------------------------------
 # European countries — ISO 3166-1 alpha-2 codes
 # ---------------------------------------------------------------------------
@@ -208,7 +215,8 @@ class AviationStackAdapter:
     Endpoint: GET https://api.aviationstack.com/v1/flights
     """
 
-    BASE_URL = "https://api.aviationstack.com/v1/flights"
+    # Free plan only supports HTTP (HTTPS requires a paid plan)
+    BASE_URL = "http://api.aviationstack.com/v1/flights"
 
     def fetch(self, api_key: str, origin: str, airline_iata: str, flight_date: str) -> list[dict]:
         params = {
