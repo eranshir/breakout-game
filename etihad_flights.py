@@ -223,14 +223,20 @@ class AviationStackAdapter:
             "access_key": api_key,
             "dep_iata": origin,
             "airline_iata": airline_iata,
-            "flight_date": flight_date,
             "limit": 100,
             "offset": 0,
         }
+        # flight_date filter requires a paid plan; omit it and filter client-side
+        if flight_date:
+            params["flight_date"] = flight_date
 
         all_data: list[dict] = []
         while True:
             resp = requests.get(self.BASE_URL, params=params, timeout=30)
+            # Free plan may reject flight_date; retry without it
+            if resp.status_code == 403 and "flight_date" in params:
+                params.pop("flight_date")
+                resp = requests.get(self.BASE_URL, params=params, timeout=30)
             resp.raise_for_status()
             body = resp.json()
 
